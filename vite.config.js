@@ -6,5 +6,12 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     historyApiFallback: true,
+    proxy: {
+      '/api-proxy': {
+        target: 'https://konne.whilter.ai',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api-proxy/, ''),
+      },
+    },
   },
 })

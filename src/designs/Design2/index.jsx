@@ -3,23 +3,35 @@
  * Pure white bg, extreme whitespace, thin elegant typography,
  * circular hemisphere pedestals, Shake Shack green as only accent color.
  */
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Crown } from 'lucide-react';
+import { COUNTRIES } from '../../utils/leaderboard';
 
 function initials(name) {
   return name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
 }
 
 const PCFG = {
-  1: { w: 152, pedestalH: 136, rankFontSize: 80, avatarW: 60, nameSz: 15, flagSz: 9, timeSz: 24, accentColor: '#29603D', foodEmoji: '🍔', emojiSz: 32, showCrown: true },
-  2: { w: 124, pedestalH: 104, rankFontSize: 62, avatarW: 48, nameSz: 14, flagSz: 9, timeSz: 18, accentColor: '#6B7280', foodEmoji: '🥤', emojiSz: 24, showCrown: false },
-  3: { w: 112, pedestalH: 78,  rankFontSize: 48, avatarW: 42, nameSz: 13, flagSz: 9, timeSz: 16, accentColor: '#9CA3AF', foodEmoji: '🍟', emojiSz: 20, showCrown: false },
-  4: { w: 96,  pedestalH: 54,  rankFontSize: 34, avatarW: 34, nameSz: 12, flagSz: 8, timeSz: 13, accentColor: '#D1D5DB', foodEmoji: '🍦', emojiSz: 16, showCrown: false },
-  5: { w: 96,  pedestalH: 44,  rankFontSize: 28, avatarW: 32, nameSz: 12, flagSz: 8, timeSz: 12, accentColor: '#E5E7EB', foodEmoji: '🌭', emojiSz: 14, showCrown: false },
+  1: { w: 152, pedestalH: 136, rankFontSize: 80, avatarW: 60, nameSz: 15, flagSz: 9, timeSz: 24, accentColor: '#29603D', pedestalBg: '#29603D', foodEmoji: '🍔', emojiSz: 32, showCrown: true },
+  2: { w: 124, pedestalH: 104, rankFontSize: 62, avatarW: 48, nameSz: 14, flagSz: 9, timeSz: 18, accentColor: '#374151', pedestalBg: '#1a1a1a', foodEmoji: '🥤', emojiSz: 24, showCrown: false },
+  3: { w: 112, pedestalH: 78,  rankFontSize: 48, avatarW: 42, nameSz: 13, flagSz: 9, timeSz: 16, accentColor: '#4B5563', pedestalBg: '#374151', foodEmoji: '🍟', emojiSz: 20, showCrown: false },
+  4: { w: 84,  pedestalH: 50,  rankFontSize: 28, avatarW: 28, nameSz: 11, flagSz: 8, timeSz: 12, accentColor: '#6B7280', pedestalBg: '#4B5563', foodEmoji: '🍦', emojiSz: 13, showCrown: false },
+  5: { w: 84,  pedestalH: 40,  rankFontSize: 22, avatarW: 26, nameSz: 11, flagSz: 8, timeSz: 11, accentColor: '#9CA3AF', pedestalBg: '#6B7280', foodEmoji: '🌭', emojiSz: 12, showCrown: false },
 };
 
-const ROW_AVATAR_COLORS = [
-  '#29603D','#1E4D6B','#7B3F00','#5C2D91','#8B0000','#006064','#37474F','#4A148C','#1B5E20','#0D47A1',
+const FOOD_BG = [
+  { emoji: '🍔', top: '6%',  left: '1%',  size: '8rem',   rot: '-12deg' },
+  { emoji: '🥤', top: '8%',  right: '2%', size: '7rem',   rot: '10deg'  },
+  { emoji: '🍟', top: '32%', left: '0%',  size: '5.5rem', rot: '8deg'   },
+  { emoji: '🍦', top: '34%', right: '1%', size: '5rem',   rot: '-10deg' },
+  { emoji: '🌭', top: '60%', left: '1%',  size: '5.5rem', rot: '-6deg'  },
+  { emoji: '🍿', top: '62%', right: '2%', size: '5rem',   rot: '14deg'  },
+  { emoji: '🍔', top: '20%', left: '12%', size: '3.5rem', rot: '6deg'   },
+  { emoji: '🥤', top: '20%', right: '12%',size: '3.5rem', rot: '-8deg'  },
+  { emoji: '🍟', top: '48%', left: '18%', size: '3.5rem', rot: '10deg'  },
+  { emoji: '🍦', top: '48%', right: '16%',size: '3.5rem', rot: '-12deg' },
+  { emoji: '🌭', top: '75%', left: '28%', size: '4rem',   rot: '-6deg'  },
+  { emoji: '🍔', top: '75%', right: '25%',size: '3.5rem', rot: '9deg'   },
 ];
 
 function PodiumCard({ entry, delay }) {
@@ -34,38 +46,40 @@ function PodiumCard({ entry, delay }) {
       className="flex flex-col items-center shrink-0"
       style={{ width: c.w }}
     >
-      <div className="flex flex-col items-center w-full pb-3 px-1 gap-1.5">
+      <div className="flex flex-col items-center w-full pb-2 px-1" style={{ gap: entry.rank <= 3 ? 5 : 3 }}>
         {c.showCrown && (
           <motion.div animate={{ y: [0, -4, 0] }} transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}>
             <Crown size={20} style={{ color: '#29603D', fill: '#29603D' }} />
           </motion.div>
         )}
 
-        <div style={{ fontSize: c.emojiSz, lineHeight: 1 }}>{c.foodEmoji}</div>
+        {entry.rank <= 3 && <div style={{ fontSize: c.emojiSz, lineHeight: 1 }}>{c.foodEmoji}</div>}
 
         <div
           className="rounded-full flex items-center justify-center font-black select-none text-white"
           style={{
             width: c.avatarW, height: c.avatarW, fontSize: c.avatarW * 0.3,
-            backgroundColor: isFirst ? '#29603D' : '#1a1a1a',
-            boxShadow: `0 4px 24px ${isFirst ? 'rgba(41,96,61,0.35)' : 'rgba(0,0,0,0.15)'}`,
+            backgroundColor: c.pedestalBg,
+            boxShadow: `0 4px 24px rgba(0,0,0,0.2)`,
           }}
         >
           {initials(entry.name)}
         </div>
 
-        {/* Country code badge */}
-        <span
-          className="inline-flex items-center justify-center font-black rounded"
-          style={{
-            fontSize: c.flagSz, letterSpacing: '0.06em',
-            padding: '2px 6px',
-            background: isFirst ? '#29603D' : '#1a1a1a',
-            color: '#fff',
-          }}
-        >
-          {entry.country.slice(0, 3).toUpperCase()}
-        </span>
+        {/* Country code badge — only for top 3 */}
+        {entry.rank <= 3 && (
+          <span
+            className="inline-flex items-center justify-center font-black rounded"
+            style={{
+              fontSize: c.flagSz, letterSpacing: '0.06em',
+              padding: '2px 6px',
+              background: c.pedestalBg,
+              color: '#fff',
+            }}
+          >
+            {entry.country.slice(0, 3).toUpperCase()}
+          </span>
+        )}
 
         <p className="font-black text-center w-full truncate leading-tight text-[#1a1a1a]"
           style={{ fontSize: c.nameSz, letterSpacing: '-0.01em' }}>
@@ -73,33 +87,33 @@ function PodiumCard({ entry, delay }) {
         </p>
 
         <p className="font-black leading-none"
-          style={{ fontSize: c.timeSz, color: isFirst ? '#29603D' : '#1a1a1a', letterSpacing: '-0.03em' }}>
+          style={{ fontSize: c.timeSz, color: c.pedestalBg, letterSpacing: '-0.03em' }}>
           {entry.timeInSeconds.toFixed(1)}s
         </p>
 
         {isFirst && <div className="w-8 h-0.5 rounded-full" style={{ background: '#29603D', opacity: 0.8 }} />}
       </div>
 
-      {/* Pedestal — hemisphere with food emoji bg */}
+      {/* Pedestal — hemisphere */}
       <div
         className="w-full relative overflow-hidden flex items-end justify-center"
         style={{
           height: c.pedestalH,
-          background: isFirst ? '#29603D' : (entry.rank === 2 ? '#1a1a1a' : '#F3F4F6'),
+          background: c.pedestalBg,
           borderRadius: '50% 50% 0 0 / 20px 20px 0 0',
-          boxShadow: isFirst ? '0 -4px 40px rgba(41,96,61,0.2), 0 8px 32px rgba(41,96,61,0.12)' : '0 -2px 20px rgba(0,0,0,0.06)',
+          boxShadow: isFirst ? '0 -4px 40px rgba(41,96,61,0.2), 0 8px 32px rgba(41,96,61,0.12)' : '0 -2px 20px rgba(0,0,0,0.12)',
         }}
       >
         {/* Food emoji bg inside pedestal */}
-        <span className="absolute pointer-events-none select-none" style={{ top: '8%', left: '5%', fontSize: Math.max(c.pedestalH * 0.28, 14), opacity: 0.12, lineHeight: 1, transform: 'rotate(-18deg)' }}>{c.foodEmoji}</span>
-        <span className="absolute pointer-events-none select-none" style={{ bottom: '10%', right: '6%', fontSize: Math.max(c.pedestalH * 0.22, 12), opacity: 0.1, lineHeight: 1, transform: 'rotate(14deg)' }}>{c.foodEmoji}</span>
+        <span className="absolute pointer-events-none select-none" style={{ top: '8%', left: '5%', fontSize: Math.max(c.pedestalH * 0.28, 10), opacity: 0.18, lineHeight: 1, transform: 'rotate(-18deg)' }}>{c.foodEmoji}</span>
+        <span className="absolute pointer-events-none select-none" style={{ bottom: '10%', right: '6%', fontSize: Math.max(c.pedestalH * 0.22, 8), opacity: 0.14, lineHeight: 1, transform: 'rotate(14deg)' }}>{c.foodEmoji}</span>
 
         <span className="absolute font-black select-none"
-          style={{ fontSize: c.rankFontSize, color: isFirst ? 'rgba(255,255,255,0.18)' : (entry.rank === 2 ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.07)'), bottom: -8, lineHeight: 1 }}>
+          style={{ fontSize: c.rankFontSize, color: 'rgba(255,255,255,0.2)', bottom: -8, lineHeight: 1 }}>
           {entry.rank}
         </span>
         <span className="absolute top-3 inset-x-0 text-center font-black select-none text-[10px]"
-          style={{ color: isFirst ? 'rgba(255,255,255,0.7)' : (entry.rank === 2 ? 'rgba(255,255,255,0.6)' : '#9CA3AF') }}>
+          style={{ color: 'rgba(255,255,255,0.7)' }}>
           #{entry.rank}
         </span>
       </div>
@@ -107,65 +121,91 @@ function PodiumCard({ entry, delay }) {
   );
 }
 
-function LeaderboardRow({ entry, isLast }) {
-  const winner = entry.isWinner;
-
+function FilterBar({ weeks, selectedWeek, setSelectedWeek, selectedCountry, setSelectedCountry, isFetching }) {
   return (
-    <motion.div
-      variants={{ hidden: { opacity: 0, x: 16 }, visible: { opacity: 1, x: 0, transition: { duration: 0.3, ease: [0.22, 1, 0.36, 1] } } }}
-      className={['flex items-center gap-4 sm:gap-6 px-6 sm:px-8 py-4 transition-colors duration-200', !isLast && 'border-b border-gray-100', 'hover:bg-gray-50/60'].filter(Boolean).join(' ')}
-    >
-      <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black shrink-0"
-        style={{ background: winner ? '#29603D' : 'transparent', color: winner ? '#fff' : '#9CA3AF', border: winner ? 'none' : '1.5px solid #E5E7EB' }}>
-        {entry.rank}
-      </div>
-      <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-black shrink-0 select-none"
-        style={{ backgroundColor: ROW_AVATAR_COLORS[entry.id % ROW_AVATAR_COLORS.length] }}>
-        {initials(entry.name)}
-      </div>
-      <div className="flex flex-col min-w-0 flex-1 gap-0.5">
-        <span className="font-bold text-base text-[#111827] truncate" style={{ letterSpacing: '-0.01em' }}>
-          {entry.name}
-          {winner && (
-            <span className="ml-2 text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full align-middle" style={{ background: '#F0FDF4', color: '#15803D', border: '1px solid #BBF7D0' }}>
-              Winner
-            </span>
+    <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}
+      className="max-w-5xl mx-auto w-full px-6 sm:px-8 pt-4 pb-1 relative z-10">
+      <div className="flex items-center gap-3 px-3.5 py-2.5 rounded-2xl" style={{ background: '#F8F9FA', border: '1px solid #E5E7EB', position: 'relative', overflow: 'hidden' }}>
+
+        <AnimatePresence>
+          {isFetching && (
+            <motion.div key="bar" initial={{ scaleX: 0, opacity: 1 }} animate={{ scaleX: 1, opacity: 1 }} exit={{ opacity: 0 }}
+              transition={{ duration: 0.9, ease: 'easeInOut' }}
+              className="absolute top-0 left-0 right-0 h-0.5"
+              style={{ background: '#29603D', transformOrigin: 'left', zIndex: 10 }} />
           )}
-        </span>
-        <span className="text-xs text-gray-400 font-mono truncate">{entry.phoneSnippet}</span>
-      </div>
-      <div className="hidden sm:flex items-center gap-2.5 shrink-0" style={{ width: 155 }}>
-        <span className="inline-flex items-center justify-center font-black rounded text-[10px] px-1.5 py-0.5 shrink-0"
-          style={{ background: '#29603D', color: '#fff', letterSpacing: '0.04em', minWidth: 28 }}>
-          {entry.country.slice(0, 2).toUpperCase()}
-        </span>
-        <span className="text-sm font-semibold text-[#1a4428] truncate hidden md:block">{entry.country}</span>
-      </div>
-      <div className="shrink-0 text-right tabular-nums font-black text-sm" style={{ color: winner ? '#29603D' : '#9CA3AF', width: '4rem', letterSpacing: '-0.02em' }}>
-        {entry.timeInSeconds.toFixed(1)}s
+        </AnimatePresence>
+
+        {/* Week pills — scrollable flex-1 */}
+        <div className="flex items-center gap-1.5 flex-1 min-w-0 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+          <span className="shrink-0 text-[8px] font-black uppercase tracking-[0.2em] mr-0.5" style={{ color: '#9CA3AF' }}>Week</span>
+          {weeks.map((w) => {
+            const active = w.dateFrom === selectedWeek.dateFrom;
+            return (
+              <button key={w.dateFrom} onClick={() => setSelectedWeek(w)} disabled={isFetching}
+                className={`filter-btn shrink-0 px-2.5 py-1 rounded-full text-[9px] font-black whitespace-nowrap ${active ? 'filter-btn-active' : 'filter-btn-light'}`}
+                style={active
+                  ? { background: '#29603D', color: '#fff', boxShadow: '0 2px 8px rgba(41,96,61,0.35)' }
+                  : { background: '#fff', color: '#374151', border: '1px solid #D1D5DB' }}>
+                {w.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Divider */}
+        <div className="shrink-0 w-px self-stretch" style={{ background: '#E5E7EB' }} />
+
+        {/* Country pills — fixed, no wrap */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          <span className="shrink-0 text-[8px] font-black uppercase tracking-[0.2em] mr-0.5" style={{ color: '#9CA3AF' }}>Country</span>
+          {COUNTRIES.map((c) => {
+            const active = c.code === selectedCountry;
+            return (
+              <button key={c.code} onClick={() => setSelectedCountry(c.code)} disabled={isFetching}
+                className={`filter-btn px-2.5 py-1 rounded-full text-[9px] font-black ${active ? 'filter-btn-active' : 'filter-btn-light'}`}
+                style={active
+                  ? { background: '#29603D', color: '#fff', boxShadow: '0 2px 8px rgba(41,96,61,0.35)' }
+                  : { background: '#fff', color: '#374151', border: '1px solid #D1D5DB' }}>
+                {c.code}
+              </button>
+            );
+          })}
+        </div>
+
       </div>
     </motion.div>
   );
 }
 
-export default function Design2({ entries }) {
+function EmptyState() {
+  return (
+    <div className="flex-1 flex flex-col items-center justify-center px-6 py-8 relative z-10">
+      <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: 'spring', stiffness: 120, damping: 14 }}
+        className="flex flex-col items-center gap-4 p-10 rounded-3xl text-center max-w-sm"
+        style={{ background: '#fff', border: '1px solid #E5E7EB', boxShadow: '0 8px 48px rgba(0,0,0,0.06)' }}>
+        <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ fontSize: '3.5rem', lineHeight: 1 }}>🍔</motion.div>
+        <div>
+          <p className="font-black text-[#1a1a1a] text-lg mb-1" style={{ letterSpacing: '-0.02em' }}>No Entries Yet</p>
+          <p className="text-sm" style={{ color: '#9CA3AF', lineHeight: 1.5 }}>Check back soon —<br />the shout-off is just getting started!</p>
+        </div>
+        <div className="flex gap-1">
+          {[0,1,2].map(i => (
+            <motion.div key={i} animate={{ scale: [1, 1.4, 1], opacity: [0.3, 1, 0.3] }}
+              transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.2 }}
+              className="w-1.5 h-1.5 rounded-full" style={{ background: '#29603D' }} />
+          ))}
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+export default function Design2({ entries, isFetching, weeks, selectedWeek, setSelectedWeek, selectedCountry, setSelectedCountry }) {
   const podiumOrder = [4, 2, 1, 3, 5];
   const get = (rank) => entries.find(e => e.rank === rank);
-
-  const FOOD_BG = [
-    { emoji: '🍔', top: '6%',  left: '1%',  size: '8rem',   rot: '-12deg' },
-    { emoji: '🥤', top: '8%',  right: '2%', size: '7rem',   rot: '10deg'  },
-    { emoji: '🍟', top: '32%', left: '0%',  size: '5.5rem', rot: '8deg'   },
-    { emoji: '🍦', top: '34%', right: '1%', size: '5rem',   rot: '-10deg' },
-    { emoji: '🌭', top: '60%', left: '1%',  size: '5.5rem', rot: '-6deg'  },
-    { emoji: '🍿', top: '62%', right: '2%', size: '5rem',   rot: '14deg'  },
-    { emoji: '🍔', top: '20%', left: '12%', size: '3.5rem', rot: '6deg'   },
-    { emoji: '🥤', top: '20%', right: '12%',size: '3.5rem', rot: '-8deg'  },
-    { emoji: '🍟', top: '48%', left: '18%', size: '3.5rem', rot: '10deg'  },
-    { emoji: '🍦', top: '48%', right: '16%',size: '3.5rem', rot: '-12deg' },
-    { emoji: '🌭', top: '75%', left: '28%', size: '4rem',   rot: '-6deg'  },
-    { emoji: '🍔', top: '75%', right: '25%',size: '3.5rem', rot: '9deg'   },
-  ];
+  const hasEntries = entries.length > 0;
 
   return (
     <div className="min-h-screen w-full flex flex-col bg-white" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
@@ -187,7 +227,7 @@ export default function Design2({ entries }) {
         </div>
       </nav>
 
-      {/* Hero + Podium — 100vh */}
+      {/* Hero + Filters + Podium — 100vh */}
       <div className="w-full flex flex-col" style={{ minHeight: 'calc(100vh - 56px)', background: '#FAFAF8', position: 'relative', overflow: 'hidden' }}>
         {FOOD_BG.map((f, i) => (
           <div key={i} className="absolute pointer-events-none select-none"
@@ -196,10 +236,14 @@ export default function Design2({ entries }) {
           </div>
         ))}
 
+        {/* Filter bar */}
+        <FilterBar weeks={weeks} selectedWeek={selectedWeek} setSelectedWeek={setSelectedWeek}
+          selectedCountry={selectedCountry} setSelectedCountry={setSelectedCountry} isFetching={isFetching} />
+
         {/* Hero */}
-        <div className="max-w-5xl mx-auto w-full px-6 sm:px-8 pt-10 pb-4 text-center relative z-10">
+        <div className="max-w-5xl mx-auto w-full px-6 sm:px-8 pt-4 pb-2 text-center relative z-10">
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-semibold tracking-widest uppercase mb-5"
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-semibold tracking-widest uppercase mb-4"
             style={{ background: '#F0FDF4', color: '#15803D', border: '1px solid #BBF7D0' }}>
             <span className="relative flex h-1.5 w-1.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
@@ -211,75 +255,52 @@ export default function Design2({ entries }) {
           <motion.h1 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.16, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
             className="text-[#1a1a1a] leading-tight mb-2"
-            style={{ fontSize: 'clamp(1.8rem, 3.2vw, 3rem)', fontWeight: 300, letterSpacing: '-0.04em', lineHeight: 1.05 }}>
+            style={{ fontSize: 'clamp(1.6rem, 2.8vw, 2.6rem)', fontWeight: 300, letterSpacing: '-0.04em', lineHeight: 1.05 }}>
             The Big Shack <strong style={{ fontWeight: 900, color: '#29603D' }}>Shout</strong> Challenge 🍔
           </motion.h1>
 
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.28 }}
-            className="mb-4 font-medium" style={{ fontSize: 'clamp(0.75rem, 1.1vw, 0.9rem)', letterSpacing: '-0.01em', color: '#6B7280' }}>
+            className="mb-2 font-medium" style={{ fontSize: 'clamp(0.7rem, 1.1vw, 0.85rem)', letterSpacing: '-0.01em', color: '#6B7280' }}>
             Say "THE BIIIIG SHACK" in one breath · Longest wins · 🏆 Top 5 win a FREE meal
           </motion.p>
         </div>
 
-        {/* Podium */}
-        <div className="flex-1 flex flex-col justify-end relative z-10">
-          <div className="max-w-5xl mx-auto w-full px-4 sm:px-8 pb-8">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="flex items-center gap-2 mb-5">
-              <span className="text-[#29603D] font-black text-[10px] tracking-[0.35em] uppercase">Top Shouters</span>
-              <div className="flex-1 h-px" style={{ background: '#29603D33' }} />
+        {/* Podium or empty state */}
+        <AnimatePresence mode="wait">
+          {hasEntries ? (
+            <motion.div key="podium" initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }} className="flex-1 flex flex-col justify-end relative z-10">
+              <div className="max-w-5xl mx-auto w-full px-4 sm:px-8 pb-6">
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="flex items-center gap-2 mb-4">
+                  <span className="text-[#29603D] font-black text-[10px] tracking-[0.35em] uppercase">Top Shouters</span>
+                  <div className="flex-1 h-px" style={{ background: '#29603D33' }} />
+                </motion.div>
+                <div className="relative rounded-2xl" style={{ padding: '0 0 4px' }}>
+                  <AnimatePresence>
+                    {isFetching && (
+                      <motion.div key="shimmer" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }} className="podium-loading-overlay rounded-2xl" />
+                    )}
+                  </AnimatePresence>
+                  <motion.div animate={{ opacity: isFetching ? 0.65 : 1 }} transition={{ duration: 0.25 }}
+                    className="flex items-end justify-center gap-3 overflow-x-auto flex-nowrap snap-x pb-1"
+                    style={{ scrollbarWidth: 'none' }}>
+                    {podiumOrder.map((rank) => {
+                      const entry = get(rank);
+                      const delays = { 1: 0.1, 2: 0.2, 3: 0.3, 4: 0.25, 5: 0.35 };
+                      return entry ? <PodiumCard key={rank} entry={entry} delay={delays[rank]} /> : null;
+                    })}
+                  </motion.div>
+                </div>
+              </div>
             </motion.div>
-            <div className="flex items-end justify-center gap-2 sm:gap-4 overflow-x-auto sm:overflow-visible flex-nowrap snap-x sm:snap-none" style={{ scrollbarWidth: 'none' }}>
-              {podiumOrder.map((rank) => {
-                const entry = get(rank);
-                const delays = { 1: 0.1, 2: 0.2, 3: 0.3, 4: 0.25, 5: 0.35 };
-                return entry ? <PodiumCard key={rank} entry={entry} delay={delays[rank]} /> : null;
-              })}
-            </div>
-          </div>
-        </div>
+          ) : (
+            <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex">
+              <EmptyState />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-
-      {/* List */}
-      <section className="w-full pb-16 bg-white relative overflow-hidden">
-        <div className="h-px w-full" style={{ background: '#E5E7EB' }} />
-
-        {/* Food emoji margin decorations */}
-        <div className="absolute left-0 top-12 bottom-12 w-20 pointer-events-none select-none hidden lg:flex flex-col justify-around items-center">
-          {['🍔','🥤','🍟','🍦','🌭'].map((e, i) => (
-            <span key={i} style={{ fontSize: '2rem', opacity: 0.1, transform: `rotate(${i % 2 === 0 ? '-12deg' : '10deg'})`, lineHeight: 1 }}>{e}</span>
-          ))}
-        </div>
-        <div className="absolute right-0 top-12 bottom-12 w-20 pointer-events-none select-none hidden lg:flex flex-col justify-around items-center">
-          {['🥤','🍦','🍔','🌭','🍟'].map((e, i) => (
-            <span key={i} style={{ fontSize: '2rem', opacity: 0.1, transform: `rotate(${i % 2 === 0 ? '12deg' : '-10deg'})`, lineHeight: 1 }}>{e}</span>
-          ))}
-        </div>
-
-        <div className="max-w-5xl mx-auto px-6 sm:px-8 pt-8">
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }} className="flex items-center gap-3 mb-5">
-            <span className="text-[#1a1a1a] font-black text-xs tracking-[0.28em] uppercase">Full Rankings</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-[#29603D] opacity-50" />
-            <span className="text-[#29603D] font-bold text-xs">Ranks 1–10</span>
-            <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg,#29603D33,transparent)' }} />
-          </motion.div>
-
-          <div className="flex items-center gap-4 sm:gap-6 px-6 sm:px-8 py-2.5 rounded-xl mb-2" style={{ background: '#F0F7F2' }}>
-            <div className="w-7 shrink-0" /><div className="w-9 shrink-0" />
-            <span className="flex-1 text-[10px] font-black text-[#29603D] uppercase tracking-wider">Participant</span>
-            <span className="hidden sm:block text-[10px] font-black text-[#29603D] uppercase tracking-wider w-36">Country</span>
-            <span className="text-[10px] font-black text-[#29603D] uppercase tracking-wider text-right w-16">Time</span>
-          </div>
-
-          <motion.div initial="hidden" animate="visible"
-            variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.04, delayChildren: 0.4 } } }}
-            className="rounded-2xl overflow-hidden"
-            style={{ border: '1px solid #F3F4F6', boxShadow: '0 1px 4px rgba(0,0,0,0.04), 0 8px 32px rgba(0,0,0,0.03)' }}>
-            {entries.map((entry, i) => (
-              <LeaderboardRow key={entry.id} entry={entry} isLast={i === entries.length - 1} />
-            ))}
-          </motion.div>
-        </div>
-      </section>
 
       {/* Footer */}
       <footer className="w-full relative overflow-hidden" style={{ background: '#1a1a1a', borderTop: '2px solid #29603D44' }}>

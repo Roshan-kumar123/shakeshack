@@ -1,5 +1,77 @@
 @import "tailwindcss";
 
+/* ── Filter pill buttons ──────────────────────────────────────────── */
+.filter-btn {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  transform: translateY(0);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease, background 0.15s ease;
+}
+
+.filter-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  opacity: 1 !important;
+}
+
+.filter-btn:active:not(:disabled) {
+  transform: translateY(0px) scale(0.96);
+}
+
+/* Inactive dark-theme pill hover (designs 1, 3, 5) */
+.filter-btn-dark:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.35) !important;
+}
+
+/* Inactive light-theme pill hover (design 2) */
+.filter-btn-light:hover:not(:disabled) {
+  background: #F0F7F2 !important;
+  border-color: #29603D !important;
+  color: #29603D !important;
+}
+
+/* Inactive brutalist pill hover (design 4) */
+.filter-btn-brut:hover:not(:disabled) {
+  background: #FFE600 !important;
+  box-shadow: 3px 3px 0 #000 !important;
+}
+
+/* Active pill — subtle pulse glow on hover */
+.filter-btn-active:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+/* Disabled state during fetch — cursor wait, dimmed */
+.filter-btn:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+/* ── Podium loading shimmer overlay ──────────────────────────────── */
+@keyframes podium-shimmer {
+  0%   { background-position: -800px 0; }
+  100% { background-position:  800px 0; }
+}
+
+.podium-loading-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.06) 40%,
+    rgba(255, 255, 255, 0.12) 50%,
+    rgba(255, 255, 255, 0.06) 60%,
+    transparent 100%
+  );
+  background-size: 800px 100%;
+  animation: podium-shimmer 1.4s infinite linear;
+  pointer-events: none;
+}
+
 /* *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
