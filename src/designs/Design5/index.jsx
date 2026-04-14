@@ -4,10 +4,8 @@
  * everything inside ultra-premium glass cards.
  * Glass navbar, glass hero card, glass podium cards, glass list panel.
  */
-import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Play, Square, Crown, Mic2 } from 'lucide-react';
-import AudioWave from '../../components/AudioWave';
+import { Crown, Mic2 } from 'lucide-react';
 
 function initials(name) {
   return name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
@@ -100,14 +98,6 @@ const GLASS_CARD = {
 
 function PodiumCard({ entry, delay }) {
   const c = PCFG[entry.rank];
-  const [playing, setPlaying] = useState(false);
-  const timer = useRef(null);
-
-  function toggle() {
-    if (playing) { setPlaying(false); clearTimeout(timer.current); }
-    else { setPlaying(true); timer.current = setTimeout(() => setPlaying(false), 5000); }
-  }
-  useEffect(() => () => clearTimeout(timer.current), []);
 
   return (
     <motion.div
@@ -170,26 +160,6 @@ function PodiumCard({ entry, delay }) {
           {entry.timeInSeconds.toFixed(1)}s
         </p>
 
-        <motion.button
-          whileTap={{ scale: 0.85 }}
-          onClick={toggle}
-          type="button"
-          aria-label={playing ? 'Stop' : 'Play shout'}
-          style={{
-            cursor: 'pointer', fontSize: 9, padding: '3px 9px',
-            background: playing ? c.borderColor : 'rgba(255,255,255,0.12)',
-            border: `1px solid ${c.borderColor}`,
-            backdropFilter: 'blur(8px)',
-            color: '#fff',
-            borderRadius: 999,
-          }}
-          className="flex items-center gap-1 font-bold transition-all duration-150"
-        >
-          {playing
-            ? <><Square size={7} strokeWidth={0} style={{ fill: 'currentColor', flexShrink: 0 }} /><AudioWave size="sm" /></>
-            : <><Play size={7} strokeWidth={0} style={{ fill: 'currentColor', flexShrink: 0, marginLeft: 1 }} /><span>Play</span></>
-          }
-        </motion.button>
       </div>
 
       {/* Glass pedestal */}
@@ -246,15 +216,6 @@ function PodiumCard({ entry, delay }) {
 }
 
 function LeaderboardRow({ entry, isLast }) {
-  const [playing, setPlaying] = useState(false);
-  const timer = useRef(null);
-
-  function toggle() {
-    if (playing) { setPlaying(false); clearTimeout(timer.current); }
-    else { setPlaying(true); timer.current = setTimeout(() => setPlaying(false), 5000); }
-  }
-  useEffect(() => () => clearTimeout(timer.current), []);
-
   const winner = entry.isWinner;
 
   return (
@@ -314,21 +275,6 @@ function LeaderboardRow({ entry, isLast }) {
       <div className="shrink-0 text-right tabular-nums font-black text-sm" style={{ color: winner ? '#F5C518' : 'rgba(255,255,255,0.35)', width: '4rem', textShadow: winner ? '0 0 8px rgba(245,197,24,0.5)' : 'none' }}>
         {entry.timeInSeconds.toFixed(1)}s
       </div>
-      <motion.button
-        whileTap={{ scale: 0.86 }} whileHover={{ scale: 1.08 }}
-        onClick={toggle}
-        aria-label={playing ? 'Stop' : 'Play shout'}
-        style={{
-          cursor: 'pointer',
-          background: playing ? 'rgba(245,197,24,0.25)' : 'rgba(255,255,255,0.08)',
-          border: '1px solid rgba(255,255,255,0.18)',
-          backdropFilter: 'blur(8px)',
-          color: playing ? '#F5C518' : 'rgba(255,255,255,0.5)',
-        }}
-        className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-all duration-200"
-      >
-        {playing ? <AudioWave size="sm" /> : <Play size={12} strokeWidth={0} style={{ fill: 'currentColor', marginLeft: 1 }} />}
-      </motion.button>
     </motion.div>
   );
 }
@@ -481,7 +427,6 @@ export default function Design5({ entries }) {
               <span className="flex-1 text-[10px] font-black uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.75)' }}>Participant</span>
               <span className="hidden sm:block text-[10px] font-black uppercase tracking-wider flex-1" style={{ color: 'rgba(255,255,255,0.75)' }}>Country</span>
               <span className="text-[10px] font-black uppercase tracking-wider text-right w-16" style={{ color: 'rgba(255,255,255,0.75)' }}>Time</span>
-              <div className="w-9 shrink-0" />
             </div>
 
             <motion.div

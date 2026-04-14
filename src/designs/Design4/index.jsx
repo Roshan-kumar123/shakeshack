@@ -4,10 +4,8 @@
  * zero border-radius, oversized food emojis as design elements,
  * bold yellow/white/orange rank fills.
  */
-import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Play, Square, Crown } from 'lucide-react';
-import AudioWave from '../../components/AudioWave';
+import { Crown } from 'lucide-react';
 
 function initials(name) {
   return name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
@@ -48,14 +46,6 @@ const BG_FOOD = [
 
 function PodiumCard({ entry, delay }) {
   const c = PCFG[entry.rank];
-  const [playing, setPlaying] = useState(false);
-  const timer = useRef(null);
-
-  function toggle() {
-    if (playing) { setPlaying(false); clearTimeout(timer.current); }
-    else { setPlaying(true); timer.current = setTimeout(() => setPlaying(false), 5000); }
-  }
-  useEffect(() => () => clearTimeout(timer.current), []);
 
   // Country badge text color adapts to card bg
   const countryBadgeBg = c.cardBg === '#FFE600' ? 'rgba(0,0,0,0.12)' : c.cardBg === '#FF6B35' ? 'rgba(0,0,0,0.15)' : 'rgba(0,0,0,0.08)';
@@ -117,26 +107,6 @@ function PodiumCard({ entry, delay }) {
           {entry.timeInSeconds.toFixed(1)}s
         </p>
 
-        <motion.button
-          whileTap={{ scale: 0.9, x: 2, y: 2 }}
-          onClick={toggle}
-          type="button"
-          aria-label={playing ? 'Stop' : 'Play shout'}
-          style={{
-            cursor: 'pointer', fontSize: 9, padding: '3px 9px',
-            background: playing ? '#000' : c.cardBg === '#FFE600' ? '#000' : '#000',
-            color: playing ? (c.cardBg === '#FFE600' ? '#FFE600' : '#fff') : (c.cardBg === '#FFE600' ? '#FFE600' : '#fff'),
-            border: `2px solid #000`,
-            boxShadow: playing ? 'none' : '2px 2px 0 #000',
-            transform: playing ? 'translate(2px,2px)' : undefined,
-          }}
-          className="flex items-center gap-1 font-black transition-all duration-100"
-        >
-          {playing
-            ? <><Square size={7} strokeWidth={0} style={{ fill: 'currentColor', flexShrink: 0 }} /><AudioWave size="sm" /></>
-            : <><Play size={7} strokeWidth={0} style={{ fill: 'currentColor', flexShrink: 0, marginLeft: 1 }} /><span>PLAY</span></>
-          }
-        </motion.button>
       </div>
 
       {/* Pedestal — flat brutalist block */}
@@ -185,15 +155,6 @@ function PodiumCard({ entry, delay }) {
 }
 
 function LeaderboardRow({ entry, isLast }) {
-  const [playing, setPlaying] = useState(false);
-  const timer = useRef(null);
-
-  function toggle() {
-    if (playing) { setPlaying(false); clearTimeout(timer.current); }
-    else { setPlaying(true); timer.current = setTimeout(() => setPlaying(false), 5000); }
-  }
-  useEffect(() => () => clearTimeout(timer.current), []);
-
   const winner = entry.isWinner;
 
   return (
@@ -245,23 +206,6 @@ function LeaderboardRow({ entry, isLast }) {
       <div className="shrink-0 text-right tabular-nums font-black text-sm w-16" style={{ color: winner ? '#000' : '#9CA3AF' }}>
         {entry.timeInSeconds.toFixed(1)}s
       </div>
-      <motion.button
-        whileTap={{ scale: 0.9, x: 2, y: 2 }}
-        whileHover={{ scale: 1.05 }}
-        onClick={toggle}
-        aria-label={playing ? 'Stop' : 'Play shout'}
-        style={{
-          cursor: 'pointer',
-          background: playing ? '#000' : '#fff',
-          color: playing ? '#FFE600' : '#000',
-          border: '2px solid #000',
-          boxShadow: playing ? 'none' : '2px 2px 0 #000',
-          transform: playing ? 'translate(2px,2px)' : undefined,
-        }}
-        className="w-9 h-9 flex items-center justify-center shrink-0 font-black transition-all duration-100"
-      >
-        {playing ? <AudioWave size="sm" /> : <Play size={12} strokeWidth={0} style={{ fill: 'currentColor', marginLeft: 1 }} />}
-      </motion.button>
     </motion.div>
   );
 }
@@ -430,7 +374,6 @@ export default function Design4({ entries }) {
             <span className="flex-1 text-[10px] font-black uppercase tracking-wider text-black">Participant</span>
             <span className="hidden sm:block text-[10px] font-black uppercase tracking-wider flex-1 text-black">Country</span>
             <span className="text-[10px] font-black uppercase tracking-wider text-right w-16 text-black">Time</span>
-            <div className="w-9 shrink-0" />
           </div>
 
           <motion.div

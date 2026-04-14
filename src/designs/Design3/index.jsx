@@ -3,10 +3,8 @@
  * Near-black bg, monolithic pedestals, massive rank numbers, neon-green + gold accents.
  * Split hero: left = text stack, right = food emoji collage.
  */
-import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Play, Square, Crown, Zap } from 'lucide-react';
-import AudioWave from '../../components/AudioWave';
+import { Crown, Zap } from 'lucide-react';
 
 function initials(name) {
   return name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
@@ -44,14 +42,6 @@ const BG_FOOD = [
 
 function PodiumCard({ entry, delay }) {
   const c = PCFG[entry.rank];
-  const [playing, setPlaying] = useState(false);
-  const timer = useRef(null);
-
-  function toggle() {
-    if (playing) { setPlaying(false); clearTimeout(timer.current); }
-    else { setPlaying(true); timer.current = setTimeout(() => setPlaying(false), 5000); }
-  }
-  useEffect(() => () => clearTimeout(timer.current), []);
 
   return (
     <motion.div
@@ -113,24 +103,6 @@ function PodiumCard({ entry, delay }) {
           {entry.timeInSeconds.toFixed(1)}s
         </p>
 
-        <motion.button
-          whileTap={{ scale: 0.85 }}
-          onClick={toggle}
-          type="button"
-          aria-label={playing ? 'Stop' : 'Play shout'}
-          style={{
-            cursor: 'pointer', fontSize: 9, padding: '3px 9px',
-            background: playing ? c.rankColor : 'transparent',
-            color: playing ? '#000' : c.rankColor,
-            border: `1px solid ${c.rankColor}`,
-          }}
-          className="flex items-center gap-1 rounded-full font-bold transition-all duration-150"
-        >
-          {playing
-            ? <><Square size={7} strokeWidth={0} style={{ fill: 'currentColor', flexShrink: 0 }} /><AudioWave size="sm" /></>
-            : <><Play size={7} strokeWidth={0} style={{ fill: 'currentColor', flexShrink: 0, marginLeft: 1 }} /><span>PLAY</span></>
-          }
-        </motion.button>
       </div>
 
       {/* Pedestal — monolithic block */}
@@ -179,15 +151,6 @@ function PodiumCard({ entry, delay }) {
 }
 
 function LeaderboardRow({ entry, isLast }) {
-  const [playing, setPlaying] = useState(false);
-  const timer = useRef(null);
-
-  function toggle() {
-    if (playing) { setPlaying(false); clearTimeout(timer.current); }
-    else { setPlaying(true); timer.current = setTimeout(() => setPlaying(false), 5000); }
-  }
-  useEffect(() => () => clearTimeout(timer.current), []);
-
   const winner = entry.isWinner;
 
   return (
@@ -234,15 +197,6 @@ function LeaderboardRow({ entry, isLast }) {
       <div className="shrink-0 text-right tabular-nums font-black text-sm" style={{ color: winner ? '#FFD700' : '#4B5563', width: '4rem', textShadow: winner ? '0 0 8px rgba(255,215,0,0.5)' : 'none' }}>
         {entry.timeInSeconds.toFixed(1)}s
       </div>
-      <motion.button
-        whileTap={{ scale: 0.86 }} whileHover={{ scale: 1.08 }}
-        onClick={toggle}
-        aria-label={playing ? 'Stop' : 'Play shout'}
-        style={{ cursor: 'pointer', background: playing ? '#00C851' : '#1a1a1a', color: playing ? '#000' : '#4B5563', border: '1px solid #374151' }}
-        className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-colors duration-200"
-      >
-        {playing ? <AudioWave size="sm" /> : <Play size={12} strokeWidth={0} style={{ fill: 'currentColor', marginLeft: 1 }} />}
-      </motion.button>
     </motion.div>
   );
 }
@@ -405,7 +359,6 @@ export default function Design3({ entries }) {
             <span className="flex-1 text-[10px] font-black uppercase tracking-wider" style={{ color: '#E5E7EB' }}>Participant</span>
             <span className="hidden sm:block text-[10px] font-black uppercase tracking-wider flex-1" style={{ color: '#E5E7EB' }}>Country</span>
             <span className="text-[10px] font-black uppercase tracking-wider text-right w-16" style={{ color: '#E5E7EB' }}>Time</span>
-            <div className="w-9 shrink-0" />
           </div>
 
           <motion.div
