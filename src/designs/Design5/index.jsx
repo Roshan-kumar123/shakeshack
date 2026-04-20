@@ -2,10 +2,11 @@
  * Design 5 — Frosted Glass / Full-Bleed Blur
  * Full-viewport blurred food-emoji wallpaper bg, dark overlay,
  * everything inside ultra-premium glass cards.
- * Glass navbar, glass hero card, glass podium cards, glass list panel.
+ * Glass navbar, glass hero card, glass podium cards, glass filter bar.
  */
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Crown, Mic2 } from 'lucide-react';
+import { COUNTRIES } from '../../utils/leaderboard';
 
 function initials(name) {
   return name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
@@ -66,28 +67,22 @@ const PCFG = {
     foodEmojis: ['🌭','🍿'], emojiSz: '1.4rem', showCrown: false,
   },
   4: {
-    w: 94, pedestalH: 54, avatarW: 32, nameSz: 12, timeSz: 12,
+    w: 84, pedestalH: 50, avatarW: 28, nameSz: 11, timeSz: 12,
     glow: '0 0 16px rgba(147,197,253,0.35), 0 0 0 1px rgba(147,197,253,0.35)',
     glowColor: 'rgba(147,197,253,0.3)',
     borderColor: 'rgba(147,197,253,0.35)',
     rankColor: '#93C5FD',
-    foodEmojis: ['🍔','🥤'], emojiSz: '1.2rem', showCrown: false,
+    foodEmojis: ['🍔','🥤'], emojiSz: '1rem', showCrown: false,
   },
   5: {
-    w: 94, pedestalH: 44, avatarW: 30, nameSz: 12, timeSz: 11,
+    w: 84, pedestalH: 40, avatarW: 26, nameSz: 11, timeSz: 11,
     glow: '0 0 16px rgba(249,168,212,0.35), 0 0 0 1px rgba(249,168,212,0.35)',
     glowColor: 'rgba(249,168,212,0.3)',
     borderColor: 'rgba(249,168,212,0.35)',
     rankColor: '#F9A8D4',
-    foodEmojis: ['🍟','🍦'], emojiSz: '1.1rem', showCrown: false,
+    foodEmojis: ['🍟','🍦'], emojiSz: '0.9rem', showCrown: false,
   },
 };
-
-const ROW_AVATAR_COLORS = [
-  'rgba(245,197,24,0.3)', 'rgba(220,220,220,0.25)', 'rgba(205,127,50,0.3)',
-  'rgba(41,96,61,0.35)', 'rgba(245,197,24,0.25)', 'rgba(147,197,253,0.25)',
-  'rgba(249,168,212,0.25)', 'rgba(255,255,255,0.15)', 'rgba(41,96,61,0.3)', 'rgba(245,197,24,0.2)',
-];
 
 const GLASS_CARD = {
   background: 'rgba(255,255,255,0.1)',
@@ -108,16 +103,18 @@ function PodiumCard({ entry, delay }) {
       style={{ width: c.w }}
     >
       {/* Above pedestal */}
-      <div className="flex flex-col items-center w-full pb-2 px-1 gap-1.5">
+      <div className="flex flex-col items-center w-full pb-2 px-1" style={{ gap: entry.rank <= 3 ? 5 : 3 }}>
         {c.showCrown && (
           <motion.div animate={{ y: [0, -4, 0] }} transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}>
             <Crown size={20} style={{ color: '#F5C518', fill: '#F5C518', filter: 'drop-shadow(0 0 10px rgba(245,197,24,0.9))' }} />
           </motion.div>
         )}
 
-        <div style={{ fontSize: c.emojiSz, lineHeight: 1, filter: 'drop-shadow(0 3px 8px rgba(0,0,0,0.4))' }}>
-          {c.foodEmojis[0]}
-        </div>
+        {entry.rank <= 3 && (
+          <div style={{ fontSize: c.emojiSz, lineHeight: 1, filter: 'drop-shadow(0 3px 8px rgba(0,0,0,0.4))' }}>
+            {c.foodEmojis[0]}
+          </div>
+        )}
 
         {/* Glass avatar */}
         <div
@@ -133,20 +130,22 @@ function PodiumCard({ entry, delay }) {
           {initials(entry.name)}
         </div>
 
-        {/* Country code badge — glass pill */}
-        <span style={{
-          fontSize: 9, padding: '2px 5px', lineHeight: 1.4,
-          background: 'rgba(255,255,255,0.15)',
-          backdropFilter: 'blur(6px)',
-          WebkitBackdropFilter: 'blur(6px)',
-          border: `1px solid ${c.borderColor}`,
-          color: '#fff',
-          fontWeight: 700,
-          letterSpacing: '0.05em',
-          borderRadius: 3,
-        }}>
-          {entry.country.slice(0, 3).toUpperCase()}
-        </span>
+        {/* Country code badge — top 3 only */}
+        {entry.rank <= 3 && (
+          <span style={{
+            fontSize: 9, padding: '2px 5px', lineHeight: 1.4,
+            background: 'rgba(255,255,255,0.15)',
+            backdropFilter: 'blur(6px)',
+            WebkitBackdropFilter: 'blur(6px)',
+            border: `1px solid ${c.borderColor}`,
+            color: '#fff',
+            fontWeight: 700,
+            letterSpacing: '0.05em',
+            borderRadius: 3,
+          }}>
+            {entry.country.slice(0, 3).toUpperCase()}
+          </span>
+        )}
 
         <p className="font-black text-center w-full truncate leading-tight text-white"
           style={{
@@ -159,7 +158,6 @@ function PodiumCard({ entry, delay }) {
         <p className="font-black leading-none" style={{ fontSize: c.timeSz, color: c.rankColor, textShadow: `0 0 12px ${c.rankColor}` }}>
           {entry.timeInSeconds.toFixed(1)}s
         </p>
-
       </div>
 
       {/* Glass pedestal */}
@@ -215,73 +213,92 @@ function PodiumCard({ entry, delay }) {
   );
 }
 
-function LeaderboardRow({ entry, isLast }) {
-  const winner = entry.isWinner;
-
+function FilterBar({ weeks, selectedWeek, setSelectedWeek, selectedCountry, setSelectedCountry, isFetching }) {
   return (
-    <motion.div
-      variants={{ hidden: { opacity: 0, x: 16 }, visible: { opacity: 1, x: 0, transition: { duration: 0.3, ease: [0.22, 1, 0.36, 1] } } }}
-      className={[
-        'flex items-center gap-4 sm:gap-5 px-5 sm:px-7 py-3.5 transition-all duration-200',
-        !isLast && 'border-b border-white/10',
-        winner ? 'hover:bg-white/10' : 'hover:bg-white/5',
-      ].filter(Boolean).join(' ')}
-      style={{ background: winner ? 'rgba(245,197,24,0.08)' : 'transparent' }}
-    >
-      <div
-        className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-black shrink-0"
-        style={winner
-          ? { background: 'rgba(245,197,24,0.25)', color: '#F5C518', border: '1px solid rgba(245,197,24,0.4)', boxShadow: '0 0 8px rgba(245,197,24,0.3)' }
-          : { background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.3)', border: '1px solid rgba(255,255,255,0.12)' }}
-      >
-        {entry.rank}
-      </div>
-      <div
-        className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-black shrink-0 select-none text-white"
-        style={{
-          background: ROW_AVATAR_COLORS[entry.id % ROW_AVATAR_COLORS.length],
-          backdropFilter: 'blur(4px)',
-          border: '1px solid rgba(255,255,255,0.2)',
-        }}
-      >
-        {initials(entry.name)}
-      </div>
-      <div className="flex flex-col min-w-0 flex-1 gap-0.5">
-        <span className="font-black text-base text-white truncate leading-snug" style={{ textShadow: '0 1px 6px rgba(0,0,0,0.5)' }}>
-          {entry.name}
-          {winner && (
-            <span className="ml-2 text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full align-middle" style={{ background: 'rgba(245,197,24,0.2)', color: '#F5C518', border: '1px solid rgba(245,197,24,0.4)' }}>
-              Winner
-            </span>
+    <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}
+      className="max-w-5xl mx-auto w-full px-6 sm:px-8 pt-4 pb-1 relative z-10">
+      <div className="flex items-center gap-3 px-3.5 py-2.5 rounded-2xl"
+        style={{ background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.18)', boxShadow: '0 4px 24px rgba(0,0,0,0.2)', position: 'relative', overflow: 'hidden' }}>
+
+        <AnimatePresence>
+          {isFetching && (
+            <motion.div key="bar" initial={{ scaleX: 0, opacity: 1 }} animate={{ scaleX: 1, opacity: 1 }} exit={{ opacity: 0 }}
+              transition={{ duration: 0.9, ease: 'easeInOut' }}
+              className="absolute top-0 left-0 right-0 h-0.5"
+              style={{ background: 'linear-gradient(90deg,#F5C518,#D4A000)', transformOrigin: 'left', zIndex: 10 }} />
           )}
-        </span>
-        <div className="flex items-center gap-1.5">
-          <span style={{
-            fontSize: 10, padding: '2px 5px', lineHeight: 1.4,
-            background: 'rgba(255,255,255,0.15)',
-            backdropFilter: 'blur(6px)',
-            border: '1px solid rgba(255,255,255,0.25)',
-            color: '#fff',
-            fontWeight: 700,
-            letterSpacing: '0.05em',
-            borderRadius: 3,
-          }}>
-            {entry.country.slice(0, 3).toUpperCase()}
-          </span>
-          <span className="text-sm font-bold truncate" style={{ color: 'rgba(255,255,255,0.75)' }}>{entry.country}</span>
+        </AnimatePresence>
+
+        {/* Week pills — scrollable flex-1 */}
+        <div className="flex items-center gap-1.5 flex-1 min-w-0 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+          <span className="shrink-0 text-[8px] font-black uppercase tracking-[0.2em] mr-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>Week</span>
+          {weeks.map((w) => {
+            const active = w.dateFrom === selectedWeek.dateFrom;
+            return (
+              <button key={w.dateFrom} onClick={() => setSelectedWeek(w)} disabled={isFetching}
+                className={`filter-btn shrink-0 px-2.5 py-1 rounded-full text-[9px] font-black whitespace-nowrap ${active ? 'filter-btn-active' : 'filter-btn-dark'}`}
+                style={active
+                  ? { background: 'linear-gradient(135deg,#F5C518,#D4A000)', color: '#1a1a1a', boxShadow: '0 0 10px rgba(245,197,24,0.5)' }
+                  : { background: 'rgba(255,255,255,0.11)', color: 'rgba(255,255,255,0.85)', border: '1px solid rgba(255,255,255,0.2)' }}>
+                {w.label}
+              </button>
+            );
+          })}
         </div>
-        <span className="text-[11px] font-mono truncate" style={{ color: 'rgba(255,255,255,0.3)' }}>{entry.phoneSnippet}</span>
-      </div>
-      <div className="shrink-0 text-right tabular-nums font-black text-sm" style={{ color: winner ? '#F5C518' : 'rgba(255,255,255,0.35)', width: '4rem', textShadow: winner ? '0 0 8px rgba(245,197,24,0.5)' : 'none' }}>
-        {entry.timeInSeconds.toFixed(1)}s
+
+        {/* Divider */}
+        <div className="shrink-0 w-px self-stretch" style={{ background: 'rgba(255,255,255,0.15)' }} />
+
+        {/* Country pills — fixed, no wrap */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          <span className="shrink-0 text-[8px] font-black uppercase tracking-[0.2em] mr-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>Country</span>
+          {COUNTRIES.map((c) => {
+            const active = c.code === selectedCountry;
+            return (
+              <button key={c.code} onClick={() => setSelectedCountry(c.code)} disabled={isFetching}
+                className={`filter-btn px-2.5 py-1 rounded-full text-[9px] font-black ${active ? 'filter-btn-active' : 'filter-btn-dark'}`}
+                style={active
+                  ? { background: 'linear-gradient(135deg,#F5C518,#D4A000)', color: '#1a1a1a', boxShadow: '0 0 10px rgba(245,197,24,0.5)' }
+                  : { background: 'rgba(255,255,255,0.11)', color: 'rgba(255,255,255,0.85)', border: '1px solid rgba(255,255,255,0.2)' }}>
+                {c.code}
+              </button>
+            );
+          })}
+        </div>
+
       </div>
     </motion.div>
   );
 }
 
-export default function Design5({ entries }) {
+function EmptyState() {
+  return (
+    <div className="flex-1 flex flex-col items-center justify-center px-6 py-8 relative z-10">
+      <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: 'spring', stiffness: 120, damping: 14 }}
+        className="flex flex-col items-center gap-4 p-8 rounded-3xl text-center max-w-sm"
+        style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(255,255,255,0.2)', boxShadow: '0 8px 48px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.1)' }}>
+        <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ fontSize: '3.5rem', lineHeight: 1, filter: 'drop-shadow(0 0 20px rgba(245,197,24,0.7))' }}>🍔</motion.div>
+        <div>
+          <p className="font-black text-white text-lg mb-1" style={{ letterSpacing: '-0.01em', textShadow: '0 2px 12px rgba(0,0,0,0.4)' }}>No Entries Yet</p>
+          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.45)', lineHeight: 1.5 }}>Check back soon —<br />the shout-off is just getting started!</p>
+        </div>
+        <div className="flex gap-1">
+          {[0,1,2].map(i => (
+            <motion.div key={i} animate={{ scale: [1, 1.4, 1], opacity: [0.4, 1, 0.4] }}
+              transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.2 }}
+              className="w-1.5 h-1.5 rounded-full" style={{ background: '#F5C518', boxShadow: '0 0 6px rgba(245,197,24,0.8)' }} />
+          ))}
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+export default function Design5({ entries, isFetching, weeks, selectedWeek, setSelectedWeek, selectedCountry, setSelectedCountry }) {
   const podiumOrder = [4, 2, 1, 3, 5];
   const get = (rank) => entries.find(e => e.rank === rank);
+  const hasEntries = entries.length > 0;
 
   return (
     <div className="min-h-screen w-full flex flex-col" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
@@ -333,22 +350,26 @@ export default function Design5({ entries }) {
           </div>
         </nav>
 
-        {/* Hero + Podium — 100vh */}
+        {/* Hero + Filters + Podium */}
         <div
           className="w-full flex flex-col"
           style={{ minHeight: 'calc(100vh - 56px)' }}
         >
+          {/* Filter bar */}
+          <FilterBar weeks={weeks} selectedWeek={selectedWeek} setSelectedWeek={setSelectedWeek}
+            selectedCountry={selectedCountry} setSelectedCountry={setSelectedCountry} isFetching={isFetching} />
+
           {/* Hero glass card */}
-          <div className="max-w-5xl mx-auto w-full px-6 sm:px-8 pt-8 pb-4">
+          <div className="max-w-5xl mx-auto w-full px-6 sm:px-8 pt-3 pb-2">
             <motion.div
               initial={{ opacity: 0, y: 20, filter: 'blur(8px)' }}
               animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
               transition={{ delay: 0.1, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-              className="rounded-3xl px-8 py-6 text-center"
+              className="rounded-3xl px-8 py-5 text-center"
               style={{ ...GLASS_CARD, boxShadow: '0 8px 48px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.15)' }}
             >
               <div
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase mb-4"
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase mb-3"
                 style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.8)' }}
               >
                 <span className="relative flex h-1.5 w-1.5">
@@ -359,103 +380,69 @@ export default function Design5({ entries }) {
               </div>
 
               <h1
-                className="font-black text-white leading-tight tracking-tight mb-3"
-                style={{ fontSize: 'clamp(1.6rem, 2.8vw, 2.4rem)', letterSpacing: '-0.02em', textShadow: '0 2px 20px rgba(0,0,0,0.4)' }}
+                className="font-black text-white leading-tight tracking-tight mb-2"
+                style={{ fontSize: 'clamp(1.4rem, 2.6vw, 2.2rem)', letterSpacing: '-0.02em', textShadow: '0 2px 20px rgba(0,0,0,0.4)' }}
               >
                 The Big Shack Shout Challenge 🍔🗣️
               </h1>
 
               <div
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl mb-3 font-black"
-                style={{ fontSize: 'clamp(0.7rem, 1.1vw, 0.85rem)', background: 'rgba(245,197,24,0.2)', border: '1px solid rgba(245,197,24,0.4)', color: '#F5C518', backdropFilter: 'blur(8px)', boxShadow: '0 0 20px rgba(245,197,24,0.15)' }}
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-xl font-black"
+                style={{ fontSize: 'clamp(0.65rem, 1vw, 0.82rem)', background: 'rgba(245,197,24,0.2)', border: '1px solid rgba(245,197,24,0.4)', color: '#F5C518', backdropFilter: 'blur(8px)', boxShadow: '0 0 20px rgba(245,197,24,0.15)' }}
               >
                 <Mic2 size={12} strokeWidth={2.5} />
                 Say "THE BIIIIG SHACK" in one breath!
               </div>
-
-              <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.72rem' }}>
-                Longest breath wins · 🏆 Top 5 win a FREE Shake Shack meal
-              </p>
             </motion.div>
           </div>
 
-          {/* Podium */}
-          <div className="flex-1 flex flex-col justify-end">
-            <div className="max-w-5xl mx-auto w-full px-4 sm:px-8 pb-8">
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 }} className="flex items-center gap-2 mb-4">
-                <span className="font-black text-[10px] tracking-[0.3em] uppercase" style={{ color: 'rgba(255,255,255,0.6)' }}>🏆 Top Shouters</span>
-                <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.1)' }} />
+          {/* Podium or empty state */}
+          <AnimatePresence mode="wait">
+            {hasEntries ? (
+              <motion.div key="podium" initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }} className="flex-1 flex flex-col justify-end">
+                <div className="max-w-5xl mx-auto w-full px-4 sm:px-8 pb-8">
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 }} className="flex items-center gap-2 mb-4">
+                    <span className="font-black text-[10px] tracking-[0.3em] uppercase" style={{ color: 'rgba(255,255,255,0.6)' }}>🏆 Top Shouters</span>
+                    <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.1)' }} />
+                  </motion.div>
+                  <div className="relative rounded-2xl" style={{ padding: '0 0 4px' }}>
+                    <AnimatePresence>
+                      {isFetching && (
+                        <motion.div key="shimmer" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                          transition={{ duration: 0.2 }} className="podium-loading-overlay rounded-2xl" />
+                      )}
+                    </AnimatePresence>
+                    <motion.div animate={{ opacity: isFetching ? 0.65 : 1 }} transition={{ duration: 0.25 }}
+                      className="flex items-end justify-center gap-3 overflow-x-auto flex-nowrap snap-x pb-1"
+                      style={{ scrollbarWidth: 'none' }}>
+                      {podiumOrder.map((rank) => {
+                        const entry = get(rank);
+                        const delays = { 1: 0.1, 2: 0.22, 3: 0.34, 4: 0.28, 5: 0.4 };
+                        return entry ? <PodiumCard key={rank} entry={entry} delay={delays[rank]} /> : null;
+                      })}
+                    </motion.div>
+                  </div>
+                </div>
               </motion.div>
-
-              <div
-                className="flex items-end justify-center gap-2 sm:gap-3 overflow-x-auto sm:overflow-visible flex-nowrap snap-x sm:snap-none pb-1"
-                style={{ scrollbarWidth: 'none' }}
-              >
-                {podiumOrder.map((rank) => {
-                  const entry = get(rank);
-                  const delays = { 1: 0.1, 2: 0.22, 3: 0.34, 4: 0.28, 5: 0.4 };
-                  return entry ? <PodiumCard key={rank} entry={entry} delay={delays[rank]} /> : null;
-                })}
-              </div>
-            </div>
-          </div>
+            ) : (
+              <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex">
+                <EmptyState />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-
-        {/* List — glass panel */}
-        <section className="w-full pb-16">
-          <div className="h-px w-full" style={{ background: 'rgba(255,255,255,0.08)' }} />
-          <div className="max-w-5xl mx-auto px-6 sm:px-8 pt-8 relative">
-
-            {/* Food emoji margin decorations */}
-            <div className="absolute left-0 top-16 bottom-16 w-10 hidden lg:flex flex-col justify-around items-center pointer-events-none select-none" aria-hidden="true" style={{ opacity: 0.25 }}>
-              {['🍔','🥤','🍟','🍦','🌭'].map((e, i) => <span key={i} style={{ fontSize: '1.5rem' }}>{e}</span>)}
-            </div>
-            <div className="absolute right-0 top-16 bottom-16 w-10 hidden lg:flex flex-col justify-around items-center pointer-events-none select-none" aria-hidden="true" style={{ opacity: 0.25 }}>
-              {['🍿','🍔','🥤','🍟','🍦'].map((e, i) => <span key={i} style={{ fontSize: '1.5rem' }}>{e}</span>)}
-            </div>
-
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="flex items-center gap-2 mb-4">
-              <span className="font-black text-sm tracking-[0.2em] uppercase" style={{ color: 'rgba(255,255,255,0.9)' }}>Full Rankings</span>
-              <span style={{ color: '#F5C518', fontSize: '0.75rem', fontWeight: 900 }}>·</span>
-              <span className="font-bold text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>Ranks 1–10</span>
-              <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.08)' }} />
-            </motion.div>
-
-            <div className="flex items-center gap-4 sm:gap-5 px-5 sm:px-7 py-2.5 rounded-xl mb-2" style={{ background: 'rgba(255,255,255,0.08)' }}>
-              <div className="w-8 shrink-0" />
-              <div className="w-10 shrink-0" />
-              <span className="flex-1 text-[10px] font-black uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.75)' }}>Participant</span>
-              <span className="hidden sm:block text-[10px] font-black uppercase tracking-wider flex-1" style={{ color: 'rgba(255,255,255,0.75)' }}>Country</span>
-              <span className="text-[10px] font-black uppercase tracking-wider text-right w-16" style={{ color: 'rgba(255,255,255,0.75)' }}>Time</span>
-            </div>
-
-            <motion.div
-              initial="hidden" animate="visible"
-              variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.05, delayChildren: 0.45 } } }}
-              className="rounded-2xl overflow-hidden"
-              style={{ ...GLASS_CARD, boxShadow: '0 4px 32px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.12)' }}
-            >
-              {entries.map((entry, i) => (
-                <LeaderboardRow key={entry.id} entry={entry} isLast={i === entries.length - 1} />
-              ))}
-            </motion.div>
-          </div>
-        </section>
 
         {/* Footer */}
         <footer className="w-full relative overflow-hidden" style={{ ...GLASS_CARD, borderRadius: 0, borderLeft: 'none', borderRight: 'none', borderBottom: 'none' }}>
-          {/* Gold shimmer accent line */}
           <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg,transparent 0%,#F5C518 30%,#F5C518 70%,transparent 100%)', opacity: 0.7 }} />
-
           <div className="relative z-10 max-w-5xl mx-auto px-6 sm:px-8 py-10">
-            {/* Brand row */}
             <div className="flex items-center justify-center gap-3 mb-4">
               <span style={{ fontSize: '1.5rem' }}>🍔</span>
               <span className="font-black text-base uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.92)', letterSpacing: '0.15em' }}>Shake Shack</span>
               <span style={{ fontSize: '1.5rem' }}>🏆</span>
             </div>
             <div className="h-px w-24 mx-auto mb-4" style={{ background: 'linear-gradient(90deg,transparent,#F5C518,transparent)' }} />
-
             <p className="text-center text-xs font-bold mb-1" style={{ color: 'rgba(255,255,255,0.82)' }}>
               The Big Shack Shout Challenge · Limited time campaign
             </p>
@@ -463,7 +450,7 @@ export default function Design5({ entries }) {
               Results update in real-time · Top 5 winners contacted via WhatsApp 📱
             </p>
             <p className="text-center text-[10px] mt-3" style={{ color: 'rgba(255,255,255,0.35)' }}>
-              © 2025 Shake Shack · All rights reserved
+              © 2026 Shake Shack · All rights reserved
             </p>
           </div>
         </footer>
