@@ -1,6 +1,7 @@
 // ─── Countries ───────────────────────────────────────────────────────────────
 
 export const COUNTRIES = [
+  { code: 'IND', label: 'India' },
   { code: 'KSA', label: 'Saudi Arabia' },
   { code: 'UAE', label: 'UAE' },
   { code: 'KWT', label: 'Kuwait' },
@@ -25,7 +26,7 @@ export function maskPhone(raw) {
 // ─── Week generation ──────────────────────────────────────────────────────────
 
 const CAMPAIGN_START = '2026-04-10'; // Friday
-const CAMPAIGN_END   = '2026-05-30'; // Saturday
+const CAMPAIGN_END   = '2026-05-28'; // Last full Thursday (last full week ends May 28)
 
 function parseDate(str) {
   const [y, m, d] = str.split('-').map(Number);

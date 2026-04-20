@@ -47,7 +47,7 @@ export default function App() {
   const [entries, setEntries]             = useState([]);
   const [isFetching, setIsFetching]       = useState(false);
   const [selectedWeek, setSelectedWeek]   = useState(() => getDefaultWeek(WEEKS));
-  const [selectedCountry, setSelectedCountry] = useState("KSA");
+  const [selectedCountry, setSelectedCountry] = useState("IND");
 
   const hasLoadedOnce = useRef(false);
 
