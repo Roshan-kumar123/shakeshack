@@ -29,7 +29,7 @@ export async function fetchLeaderboardData({ country, dateFrom, dateTo }) {
   // Map API shape → internal shape used by all 5 designs
   return (data.entries || []).map((e) => ({
     rank:          e.rank,
-    name:          e.name,
+    name:          e.name.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' '),
     phone:         maskPhone(e.phone),
     country:       e.country,
     timeInSeconds: e.duration,
