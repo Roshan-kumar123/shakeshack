@@ -50,7 +50,7 @@ function PodiumAudio({ url }) {
 
   return (
     <button onClick={toggle}
-      className="flex items-center gap-1.5 px-2.5 py-1 rounded-full font-black text-[10px] transition-all shrink-0"
+      className="flex items-center gap-1.5 px-2.5 py-1 rounded-full font-black text-[10px] transition-all shrink-0 cursor-pointer"
       style={{
         background: playing ? 'rgba(245,197,24,0.2)' : 'rgba(255,255,255,0.1)',
         border: `1px solid ${playing ? 'rgba(245,197,24,0.5)' : 'rgba(255,255,255,0.2)'}`,
@@ -143,7 +143,7 @@ function WeekDropdown({ weeks, selectedWeek, setSelectedWeek, isFetching }) {
     <div ref={ref} className="relative shrink-0">
       <button
         onClick={() => !isFetching && setOpen(o => !o)}
-        className="flex items-center gap-2 px-3.5 py-1.5 rounded-full font-black text-[11px] whitespace-nowrap"
+        className="flex items-center gap-2 px-3.5 py-1.5 rounded-full font-black text-[11px] whitespace-nowrap cursor-pointer"
         style={{ background: 'linear-gradient(135deg,#F5C518,#D4A000)', color: '#1a1a1a', boxShadow: '0 0 12px rgba(245,197,24,0.35)' }}>
         {selectedWeek.label}
         <ChevronDown size={12} style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
@@ -186,7 +186,7 @@ function FilterBar({ weeks, selectedWeek, setSelectedWeek, selectedCountry, setS
     <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
       className="w-full px-4 sm:px-6 pt-4 pb-1 relative z-20 flex justify-center">
       <div className="flex items-center gap-3 px-4 py-2.5 rounded-2xl w-full max-w-2xl relative overflow-visible"
-        style={{ background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.12)' }}>
+        style={{ background: 'rgba(10,41,26,0.8)', backdropFilter: 'blur(16px)', border: '1px solid rgba(245,197,24,0.25)' }}>
 
         {/* Loading bar */}
         <AnimatePresence>
@@ -212,10 +212,10 @@ function FilterBar({ weeks, selectedWeek, setSelectedWeek, selectedCountry, setS
             const active = c.code === selectedCountry;
             return (
               <button key={c.code} onClick={() => !isFetching && setSelectedCountry(c.code)}
-                className="px-2.5 py-1 rounded-full text-[10px] font-black transition-all"
+                className="px-2.5 py-1 rounded-full text-[10px] font-black transition-all cursor-pointer hover:opacity-90"
                 style={active
                   ? { background: 'linear-gradient(135deg,#F5C518,#D4A000)', color: '#1a1a1a', boxShadow: '0 0 8px rgba(245,197,24,0.4)' }
-                  : { background: 'rgba(255,255,255,0.09)', color: 'rgba(255,255,255,0.75)', border: '1px solid rgba(255,255,255,0.15)' }}>
+                  : { background: 'transparent', color: 'rgba(255,255,255,0.75)', border: '1px solid rgba(255,255,255,0.2)' }}>
                 {c.code}
               </button>
             );
@@ -273,7 +273,7 @@ function AudioPlayer({ url }) {
 
   return (
     <button onClick={toggle}
-      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full font-black text-[10px] transition-all"
+      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full font-black text-[10px] transition-all cursor-pointer"
       style={{ background: playing ? 'rgba(245,197,24,0.2)' : 'rgba(255,255,255,0.08)', border: `1px solid ${playing ? 'rgba(245,197,24,0.45)' : 'rgba(255,255,255,0.15)'}`, color: playing ? '#F5C518' : 'rgba(255,255,255,0.75)' }}>
       {playing ? <><AudioWave size="sm" /><span>Pause</span></> : <><Play size={10} fill="currentColor" /><span>Play</span></>}
     </button>
@@ -384,16 +384,16 @@ export default function Design1({ entries, isFetching, weeks, selectedWeek, setS
   const hasEntries = entries.length > 0;
 
   return (
-    <div className="min-h-screen w-full flex flex-col" style={{ background: 'radial-gradient(ellipse at top,#143d22 0%,#0a2818 60%,#06180f 100%)' }}>
+    <div className="min-h-screen w-full flex flex-col" style={{ background: '#0a291a' }}>
 
       {/* ── Navbar ── */}
       <nav className="w-full shrink-0 sticky top-0 z-50 flex items-center justify-center"
-        style={{ height: 64, background: 'rgba(8,30,18,0.95)', backdropFilter: 'blur(20px)' }}>
-        <img src={footerLogo} alt="Shake Shack" style={{ height: 30, objectFit: 'contain' }} />
+        style={{ height: 69, background: '#0A291AE6', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+        <img src={footerLogo} alt="Shake Shack" style={{ height: 44, width: 'auto', objectFit: 'contain' }} />
       </nav>
 
-      {/* Gold separator */}
-      <div className="w-full shrink-0" style={{ height: 1, background: 'linear-gradient(90deg,transparent,rgba(245,197,24,0.5) 20%,rgba(245,197,24,0.5) 80%,transparent)' }} />
+      {/* Gold separator — full width solid */}
+      <div className="w-full shrink-0" style={{ height: 1, background: 'rgba(245,197,24,0.4)' }} />
 
       {/* ── Main content ── */}
       <div className="flex-1 flex flex-col items-center w-full">
@@ -475,10 +475,9 @@ export default function Design1({ entries, isFetching, weeks, selectedWeek, setS
       </div>
 
       {/* ── Footer ── */}
-      <footer className="w-full shrink-0" style={{ background: '#06180f' }}>
-        <div className="w-full" style={{ height: 1, background: 'linear-gradient(90deg,transparent,rgba(245,197,24,0.45) 20%,rgba(245,197,24,0.45) 80%,transparent)' }} />
+      <footer className="w-full shrink-0" style={{ background: '#0A291AE6', borderTop: '1px solid rgba(245,197,24,0.4)' }}>
         <div className="max-w-3xl mx-auto px-6 py-8 flex flex-col items-center gap-3">
-          <img src={footerLogo} alt="Shake Shack" style={{ height: 32, objectFit: 'contain' }} />
+          <img src={footerLogo} alt="Shake Shack" style={{ height: 44, width: 'auto', objectFit: 'contain' }} />
           <p className="text-xs text-center" style={{ color: 'rgba(255,255,255,0.4)', lineHeight: 1.6 }}>
             Limited time campaign · Results update in real-time<br />
             Top 5 winners contacted via WhatsApp 📱
