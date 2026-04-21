@@ -141,12 +141,13 @@ function WeekDropdown({ weeks, selectedWeek, setSelectedWeek, isFetching }) {
 
   return (
     <div ref={ref} className="relative shrink-0">
+      {/* Week pill — dark green bg, gold border, white text */}
       <button
         onClick={() => !isFetching && setOpen(o => !o)}
-        className="flex items-center gap-2 px-3.5 py-1.5 rounded-full font-black text-[11px] whitespace-nowrap cursor-pointer"
-        style={{ background: 'linear-gradient(135deg,#F5C518,#D4A000)', color: '#1a1a1a', boxShadow: '0 0 12px rgba(245,197,24,0.35)' }}>
+        className="flex items-center gap-2 px-4 py-1.5 rounded-full font-bold text-[12px] whitespace-nowrap cursor-pointer"
+        style={{ background: 'transparent', color: '#ffffff', border: '1.5px solid #F5C518' }}>
         {selectedWeek.label}
-        <ChevronDown size={12} style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+        <ChevronDown size={13} style={{ color: '#F5C518', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
       </button>
 
       <AnimatePresence>
@@ -156,19 +157,21 @@ function WeekDropdown({ weeks, selectedWeek, setSelectedWeek, isFetching }) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -6, scale: 0.97 }}
             transition={{ duration: 0.15 }}
-            className="absolute top-full mt-2 left-0 z-50 rounded-xl overflow-hidden min-w-40"
-            style={{ background: '#0f3320', border: '1px solid rgba(245,197,24,0.25)', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
+            className="absolute top-full mt-1 left-0 z-50 rounded-xl overflow-hidden min-w-40"
+            style={{ background: '#0d2e1c', border: '1px solid rgba(245,197,24,0.25)', boxShadow: '0 8px 24px rgba(0,0,0,0.5)' }}>
             {weeks.map((w) => {
               const active = w.dateFrom === selectedWeek.dateFrom;
               return (
                 <button key={w.dateFrom}
                   onClick={() => { setSelectedWeek(w); setOpen(false); }}
-                  className="w-full text-left px-4 py-2.5 text-[11px] font-bold whitespace-nowrap transition-colors"
+                  className="w-full text-left px-4 py-2.5 text-[12px] font-medium whitespace-nowrap cursor-pointer"
                   style={{
-                    background: active ? 'rgba(245,197,24,0.15)' : 'transparent',
-                    color: active ? '#F5C518' : 'rgba(255,255,255,0.75)',
-                    borderLeft: active ? '2px solid #F5C518' : '2px solid transparent',
-                  }}>
+                    background: active ? '#2563EB' : 'transparent',
+                    color: active ? '#ffffff' : 'rgba(255,255,255,0.85)',
+                    fontWeight: active ? 700 : 400,
+                  }}
+                  onMouseEnter={e => { if (!active) { e.currentTarget.style.background = '#2563EB'; e.currentTarget.style.color = '#ffffff'; } }}
+                  onMouseLeave={e => { if (!active) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.85)'; } }}>
                   {w.label}
                 </button>
               );
@@ -199,23 +202,25 @@ function FilterBar({ weeks, selectedWeek, setSelectedWeek, selectedCountry, setS
         </AnimatePresence>
 
         {/* WEEK label + dropdown */}
-        <span className="shrink-0 text-[9px] font-black uppercase tracking-[0.18em]" style={{ color: 'rgba(255,255,255,0.4)' }}>Week</span>
+        <span className="shrink-0 text-[11px] font-bold uppercase tracking-[0.15em]" style={{ color: 'rgba(255,255,255,0.5)' }}>Week</span>
         <WeekDropdown weeks={weeks} selectedWeek={selectedWeek} setSelectedWeek={setSelectedWeek} isFetching={isFetching} />
 
         {/* Divider */}
-        <div className="shrink-0 w-px self-stretch mx-1" style={{ background: 'rgba(255,255,255,0.15)' }} />
+        <div className="shrink-0 w-px self-stretch" style={{ background: 'rgba(245,197,24,0.3)' }} />
 
         {/* COUNTRY label + pills */}
-        <span className="shrink-0 text-[9px] font-black uppercase tracking-[0.18em]" style={{ color: 'rgba(255,255,255,0.4)' }}>Country</span>
-        <div className="flex items-center gap-1.5 flex-wrap">
+        <span className="shrink-0 text-[11px] font-bold uppercase tracking-[0.15em]" style={{ color: 'rgba(255,255,255,0.5)' }}>Country</span>
+        <div className="flex items-center gap-2 flex-wrap">
           {COUNTRIES.map((c) => {
             const active = c.code === selectedCountry;
             return (
               <button key={c.code} onClick={() => !isFetching && setSelectedCountry(c.code)}
-                className="px-2.5 py-1 rounded-full text-[10px] font-black transition-all cursor-pointer hover:opacity-90"
+                className="px-3 py-1 rounded-full text-[12px] font-semibold transition-all cursor-pointer"
                 style={active
-                  ? { background: 'linear-gradient(135deg,#F5C518,#D4A000)', color: '#1a1a1a', boxShadow: '0 0 8px rgba(245,197,24,0.4)' }
-                  : { background: 'transparent', color: 'rgba(255,255,255,0.75)', border: '1px solid rgba(255,255,255,0.2)' }}>
+                  ? { background: '#F5C518', color: '#1a1a1a' }
+                  : { background: 'transparent', color: '#F5C518' }}
+                onMouseEnter={e => { if (!active) { e.currentTarget.style.color = '#ffffff'; } }}
+                onMouseLeave={e => { if (!active) { e.currentTarget.style.color = '#F5C518'; } }}>
                 {c.code}
               </button>
             );
@@ -446,12 +451,22 @@ export default function Design1({ entries, isFetching, weeks, selectedWeek, setS
                 <div className="relative">
                   <AnimatePresence>
                     {isFetching && (
-                      <motion.div key="shimmer" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                        className="absolute inset-0 rounded-2xl z-10 pointer-events-none"
-                        style={{ background: 'rgba(0,0,0,0.25)', backdropFilter: 'blur(2px)' }} />
+                      <motion.div key="skeleton" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="absolute inset-0 z-10 flex items-end justify-center gap-2 px-4 pb-1"
+                        style={{ borderRadius: 16 }}>
+                        {[104, 116, 140, 104, 88].map((w, i) => (
+                          <div key={i} className="flex flex-col items-center shrink-0 animate-pulse" style={{ width: w }}>
+                            <div className="rounded-full mb-2" style={{ width: w * 0.4, height: w * 0.4, background: 'rgba(255,255,255,0.1)' }} />
+                            <div className="rounded mb-1.5" style={{ width: '70%', height: 8, background: 'rgba(255,255,255,0.1)' }} />
+                            <div className="rounded mb-1.5" style={{ width: '50%', height: 10, background: 'rgba(245,197,24,0.15)' }} />
+                            <div className="w-full rounded-t-xl" style={{ height: [70, 90, 120, 64, 54][i], background: 'rgba(255,255,255,0.07)' }} />
+                          </div>
+                        ))}
+                      </motion.div>
                     )}
                   </AnimatePresence>
-                  <motion.div animate={{ opacity: isFetching ? 0.65 : 1 }} transition={{ duration: 0.25 }}
+                  <motion.div animate={{ opacity: isFetching ? 0 : 1 }} transition={{ duration: 0.25 }}
                     className="flex items-end justify-center gap-2 overflow-x-auto flex-nowrap pb-1"
                     style={{ scrollbarWidth: 'none' }}>
                     {podiumOrder.map((rank) => {
