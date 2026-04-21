@@ -34,5 +34,7 @@ export async function fetchLeaderboardData({ country, dateFrom, dateTo }) {
     country:       e.country,
     timeInSeconds: e.duration,
     isWinner:      e.rank <= 5,
+    audioUrl:      e.audio_url || null,
+    analysis:      e.analysis  || null,
   }));
 }
