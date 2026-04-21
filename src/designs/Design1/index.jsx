@@ -1,8 +1,9 @@
 /**
  * Design 1 — Modern Classic (Shake Shack Green + Glassmorphism)
  */
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Crown, Mic2, Clock } from 'lucide-react';
+import { Crown, Mic2, Clock, ChevronDown, ChevronUp, Play, Pause, Mic } from 'lucide-react';
 import { COUNTRIES } from '../../utils/leaderboard';
 
 function initials(name) {
@@ -165,6 +166,175 @@ function EmptyState() {
   );
 }
 
+function AudioPlayer({ url }) {
+  const [playing, setPlaying] = useState(false);
+  const audioRef = useState(() => {
+    const a = new Audio(url);
+    a.preload = 'none';
+    return a;
+  })[0];
+
+  // Stop audio when component unmounts
+  useState(() => () => { audioRef.pause(); });
+
+  function toggle() {
+    if (playing) {
+      audioRef.pause();
+      setPlaying(false);
+    } else {
+      audioRef.play().catch(() => setPlaying(false));
+      setPlaying(true);
+      audioRef.onended = () => setPlaying(false);
+    }
+  }
+
+  return (
+    <button onClick={toggle}
+      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full font-black text-[10px] transition-all"
+      style={{ background: playing ? 'rgba(245,197,24,0.25)' : 'rgba(255,255,255,0.1)', border: `1px solid ${playing ? 'rgba(245,197,24,0.5)' : 'rgba(255,255,255,0.2)'}`, color: playing ? '#F5C518' : 'rgba(255,255,255,0.8)' }}>
+      {playing ? <Pause size={11} fill="currentColor" /> : <Play size={11} fill="currentColor" />}
+      {playing ? 'Pause' : 'Play'}
+    </button>
+  );
+}
+
+function AnalysisRow({ entry, index }) {
+  const [open, setOpen] = useState(false);
+  const a = entry.analysis;
+  const hasAudio = entry.audioUrl && entry.audioUrl.length > 0;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.05 }}
+      className="rounded-xl overflow-hidden"
+      style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
+
+      {/* Row header — always visible */}
+      <button onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center gap-3 px-4 py-3 text-left"
+        style={{ cursor: 'pointer' }}>
+
+        {/* Rank badge */}
+        <span className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center font-black text-[11px]"
+          style={{ background: 'linear-gradient(135deg,#F5C518,#D4A000)', color: '#1a1a1a' }}>
+          {entry.rank}
+        </span>
+
+        {/* Name + phone */}
+        <div className="flex-1 min-w-0">
+          <p className="font-black text-white text-sm leading-none truncate">{entry.name}</p>
+          <p className="text-[10px] mt-0.5 truncate" style={{ color: 'rgba(255,255,255,0.4)' }}>{entry.phone}</p>
+        </div>
+
+        {/* Valid duration — prominent */}
+        <div className="shrink-0 text-right mr-1">
+          <p className="font-black text-sm leading-none" style={{ color: '#F5C518' }}>{entry.timeInSeconds.toFixed(2)}s</p>
+          <p className="text-[9px] mt-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>valid</p>
+        </div>
+
+        {/* Total duration if analysis exists */}
+        {a?.total_duration != null && (
+          <div className="shrink-0 text-right mr-1">
+            <p className="font-black text-sm leading-none" style={{ color: 'rgba(255,255,255,0.55)' }}>{Number(a.total_duration).toFixed(2)}s</p>
+            <p className="text-[9px] mt-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>recorded</p>
+          </div>
+        )}
+
+        {/* Rating pill */}
+        {a ? (
+          <span className="shrink-0 text-[10px] font-black px-2 py-0.5 rounded-full" style={{ background: 'rgba(245,197,24,0.15)', color: '#F5C518', border: '1px solid rgba(245,197,24,0.3)' }}>
+            {a.rating.emoji} {a.rating.label}
+          </span>
+        ) : (
+          <span className="shrink-0 text-[10px] px-2 py-0.5 rounded-full" style={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.35)', border: '1px solid rgba(255,255,255,0.1)' }}>
+            No analysis
+          </span>
+        )}
+
+        {/* Expand toggle */}
+        <span style={{ color: 'rgba(255,255,255,0.3)' }}>
+          {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+        </span>
+      </button>
+
+      {/* Expanded detail panel */}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.22, ease: 'easeInOut' }}
+            style={{ overflow: 'hidden' }}>
+            <div className="px-4 pb-4 pt-1 flex flex-col gap-3"
+              style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+
+              {/* Stats grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {[
+                  { label: 'Valid Duration',    value: `${entry.timeInSeconds.toFixed(2)}s`, accent: true },
+                  { label: 'Total Recorded',    value: a?.total_duration    != null ? `${Number(a.total_duration).toFixed(2)}s`    : '—' },
+                  { label: 'Total Speech',      value: a?.total_speech      != null ? `${Number(a.total_speech).toFixed(2)}s`      : '—' },
+                  { label: 'Longest Breath',    value: a?.longest_speech    != null ? `${Number(a.longest_speech).toFixed(2)}s`    : '—' },
+                ].map(stat => (
+                  <div key={stat.label} className="rounded-lg px-3 py-2"
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                    <p className="text-[9px] uppercase tracking-wider mb-1" style={{ color: 'rgba(255,255,255,0.35)' }}>{stat.label}</p>
+                    <p className="font-black text-sm" style={{ color: stat.accent ? '#F5C518' : 'rgba(255,255,255,0.8)' }}>{stat.value}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Transcript */}
+              {a?.transcript && (
+                <div className="rounded-lg px-3 py-2.5 flex items-start gap-2"
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                  <Mic size={12} className="shrink-0 mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }} />
+                  <div>
+                    <p className="text-[9px] uppercase tracking-wider mb-1" style={{ color: 'rgba(255,255,255,0.35)' }}>Transcript</p>
+                    <p className="text-sm italic" style={{ color: 'rgba(255,255,255,0.75)' }}>"{a.transcript}"</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Audio player */}
+              {hasAudio ? (
+                <div className="flex items-center gap-3">
+                  <AudioPlayer url={entry.audioUrl} />
+                  <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.35)' }}>Voice recording</span>
+                </div>
+              ) : (
+                <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.25)' }}>No audio available</p>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
+function AnalysisSection({ entries }) {
+  if (!entries.length) return null;
+  return (
+    <div className="w-full max-w-5xl mx-auto px-4 sm:px-8 pb-10 relative z-10">
+      <div className="flex items-center gap-2 mb-4">
+        <Mic size={12} style={{ color: '#F5C518' }} />
+        <span className="text-white/80 font-black text-[10px] tracking-[0.3em] uppercase">Voice Analysis</span>
+        <span className="text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-wider" style={{ background: 'rgba(245,197,24,0.15)', color: '#F5C518', border: '1px solid rgba(245,197,24,0.25)' }}>Internal</span>
+        <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.1)' }} />
+      </div>
+      <div className="flex flex-col gap-2">
+        {entries.map((entry, i) => (
+          <AnalysisRow key={entry.rank} entry={entry} index={i} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function Design1({ entries, isFetching, weeks, selectedWeek, setSelectedWeek, selectedCountry, setSelectedCountry }) {
   const podiumOrder = [4, 2, 1, 3, 5];
   const get = (rank) => entries.find(e => e.rank === rank);
@@ -278,6 +448,9 @@ export default function Design1({ entries, isFetching, weeks, selectedWeek, setS
           )}
         </AnimatePresence>
       </div>
+
+      {/* Voice Analysis — internal testing panel */}
+      {entries.length > 0 && <AnalysisSection entries={entries} />}
 
       {/* Footer */}
       <footer className="w-full relative overflow-hidden"
