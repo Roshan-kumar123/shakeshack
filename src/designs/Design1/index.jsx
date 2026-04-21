@@ -16,11 +16,11 @@ function initials(name) {
 }
 
 const PCFG = {
-  1: { glow: '0 0 0 2px rgba(245,197,24,0.8)', border: '#F5C518', avatarBg: '#1a4a2a', avatarBorder: 'rgba(245,197,24,0.7)', rankColor: '#F5C518', timeColor: '#F5C518', pedestalH: 120, w: 140, avatarW: 56, nameSz: 14, timeSz: 18, showCrown: true },
-  2: { glow: '0 0 0 2px rgba(209,213,219,0.6)', border: 'rgba(255,255,255,0.25)', avatarBg: '#1e3a2a', avatarBorder: 'rgba(209,213,219,0.5)', rankColor: '#D1D5DB', timeColor: '#ffffff', pedestalH: 90,  w: 116, avatarW: 46, nameSz: 13, timeSz: 15, showCrown: false },
-  3: { glow: '0 0 0 2px rgba(205,127,50,0.6)',  border: 'rgba(255,255,255,0.2)',  avatarBg: '#1e3520', avatarBorder: 'rgba(205,127,50,0.5)',  rankColor: '#CD7F32', timeColor: '#ffffff', pedestalH: 70,  w: 104, avatarW: 38, nameSz: 12, timeSz: 14, showCrown: false },
-  4: { glow: '0 0 0 1px rgba(255,255,255,0.15)', border: 'rgba(255,255,255,0.12)', avatarBg: '#1a3020', avatarBorder: 'rgba(255,255,255,0.2)', rankColor: '#9CA3AF', timeColor: '#ffffff', pedestalH: 54,  w: 88,  avatarW: 30, nameSz: 11, timeSz: 12, showCrown: false },
-  5: { glow: '0 0 0 1px rgba(255,255,255,0.15)', border: 'rgba(255,255,255,0.12)', avatarBg: '#1a3020', avatarBorder: 'rgba(255,255,255,0.2)', rankColor: '#9CA3AF', timeColor: '#ffffff', pedestalH: 42,  w: 88,  avatarW: 28, nameSz: 11, timeSz: 11, showCrown: false },
+  1: { glow: '0 0 0 2px rgba(245,197,24,0.8)', border: '#F5C518', avatarBg: '#1a4a2a', avatarBorder: 'rgba(245,197,24,0.7)', rankColor: '#F5C518', timeColor: '#F5C518', pedestalH: 120, w: 140, avatarW: 56, nameSz: 14, timeSz: 18, showCrown: true,  foodEmoji: '🍔' },
+  2: { glow: '0 0 0 2px rgba(209,213,219,0.6)', border: 'rgba(255,255,255,0.25)', avatarBg: '#1e3a2a', avatarBorder: 'rgba(209,213,219,0.5)', rankColor: '#D1D5DB', timeColor: '#ffffff', pedestalH: 90,  w: 116, avatarW: 46, nameSz: 13, timeSz: 15, showCrown: false, foodEmoji: '🥤' },
+  3: { glow: '0 0 0 2px rgba(205,127,50,0.6)',  border: 'rgba(255,255,255,0.2)',  avatarBg: '#1e3520', avatarBorder: 'rgba(205,127,50,0.5)',  rankColor: '#CD7F32', timeColor: '#ffffff', pedestalH: 70,  w: 104, avatarW: 38, nameSz: 12, timeSz: 14, showCrown: false, foodEmoji: '🍟' },
+  4: { glow: '0 0 0 1px rgba(255,255,255,0.15)', border: 'rgba(255,255,255,0.12)', avatarBg: '#1a3020', avatarBorder: 'rgba(255,255,255,0.2)', rankColor: '#9CA3AF', timeColor: '#ffffff', pedestalH: 64,  w: 88,  avatarW: 30, nameSz: 11, timeSz: 12, showCrown: false, foodEmoji: '🍦' },
+  5: { glow: '0 0 0 1px rgba(255,255,255,0.15)', border: 'rgba(255,255,255,0.12)', avatarBg: '#1a3020', avatarBorder: 'rgba(255,255,255,0.2)', rankColor: '#9CA3AF', timeColor: '#ffffff', pedestalH: 54,  w: 88,  avatarW: 28, nameSz: 11, timeSz: 11, showCrown: false, foodEmoji: '🌭' },
 };
 
 // ─── Podium audio player (inline, with AudioWave) ────────────────────────────
@@ -113,9 +113,14 @@ function PodiumCard({ entry, delay }) {
       </div>
 
       {/* Pedestal */}
-      <div className="w-full rounded-t-xl relative overflow-hidden flex items-end justify-center"
+      <div className="w-full rounded-t-xl relative overflow-hidden flex flex-col items-center justify-between pt-1.5 pb-1"
         style={{ height: c.pedestalH, background: entry.rank === 1 ? 'rgba(245,197,24,0.12)' : 'rgba(255,255,255,0.07)', border: `1px solid ${c.border}`, borderBottom: 'none' }}>
-        <span className="font-black select-none pb-1" style={{ fontSize: c.pedestalH * 0.65, color: c.rankColor, lineHeight: 1 }}>{entry.rank}</span>
+        {/* #N label top */}
+        <span className="font-black select-none leading-none" style={{ fontSize: 10, color: 'rgba(255,255,255,0.55)' }}>#{entry.rank}</span>
+        {/* Food emoji middle */}
+        <span className="select-none leading-none" style={{ fontSize: Math.max(c.pedestalH * 0.22, 13) }}>{c.foodEmoji}</span>
+        {/* Rank number bottom */}
+        <span className="font-black select-none leading-none" style={{ fontSize: c.pedestalH * 0.42, color: c.rankColor, lineHeight: 1 }}>{entry.rank}</span>
       </div>
     </motion.div>
   );
