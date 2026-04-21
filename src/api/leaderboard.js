@@ -3,6 +3,25 @@ import { maskPhone } from '../utils/leaderboard';
 const API_URL = '/api-proxy/api/tools-service/leaderboard/top';
 const CAMPAIGN_ID = 'bigshack';
 
+function proxyAudioUrl(url) {
+  if (!url) return null;
+  try {
+    const parsed = new URL(url);
+    // Normalise path-style → virtual-hosted-style
+    if (parsed.hostname === 's3.ap-south-1.amazonaws.com') {
+      parsed.hostname = 'travelpro-bucket.s3.ap-south-1.amazonaws.com';
+      parsed.pathname = parsed.pathname.replace(/^\/travelpro-bucket/, '');
+    }
+    // Strip pre-signed query params — public files don't need them
+    if (parsed.searchParams.has('X-Amz-Algorithm')) {
+      parsed.search = '';
+    }
+    return parsed.toString();
+  } catch {
+    return url;
+  }
+}
+
 /**
  * Fetches leaderboard data from the real API.
  *
@@ -15,7 +34,7 @@ export async function fetchLeaderboardData({ country, dateFrom, dateTo }) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       campaign_id: CAMPAIGN_ID,
-      country,
+      ...(country && country !== 'ALL' ? { country } : {}),
       date_from: dateFrom,
       date_to:   dateTo,
     }),
@@ -34,7 +53,7 @@ export async function fetchLeaderboardData({ country, dateFrom, dateTo }) {
     country:       e.country,
     timeInSeconds: e.duration,
     isWinner:      e.rank <= 5,
-    audioUrl:      e.audio_url || null,
+    audioUrl:      proxyAudioUrl(e.audio_url),
     analysis:      e.analysis  || null,
   }));
 }
